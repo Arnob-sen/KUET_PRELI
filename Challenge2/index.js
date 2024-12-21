@@ -4,6 +4,7 @@ const express = require("express");
 const { connectToDB } = require("./db/dbconnect");
 const { createTables } = require("./db/tables");
 const ingredientsRouter = require("./routes/ingredients");
+const recipesRouter = require("./routes/recipes");
 
 const app = express();
 app.use(express.json());
@@ -13,6 +14,7 @@ app.get("/", (req, res) => {
   res.send("Hello World");
 });
 app.use("/api/ingredients", ingredientsRouter);
+app.use("/api/recipes", recipesRouter);
 
 const port = process.env.PORT || 3000;
 
