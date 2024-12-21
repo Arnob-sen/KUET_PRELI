@@ -1,4 +1,7 @@
 const fs = require("fs");
+const OpenAI = require("openai");
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const { pool } = require("../db/dbconnect");
 
 const getAllRecipes = async (req, res) => {
   try {
@@ -193,9 +196,90 @@ const updateRecipeByRID = async (req, res) => {
   }
 };
 
+const getRecipeSuggestions = async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ message: "Prompt is required" });
+    }
+
+    const ingredientsResult = await pool.query(
+      "SELECT * FROM ingredients WHERE quantity > 0"
+    );
+    const availableIngredients = ingredientsResult.rows;
+
+    const data = fs.readFileSync("my_fav_recipes.txt", "utf-8");
+    const recipes = data
+      .trim()
+      .split("\n\n")
+      .map((recipe) => {
+        const lines = recipe.split("\n");
+        return {
+          rid: lines[0].split(": ")[1],
+          recipe_name: lines[1].split(": ")[1],
+          ingredients: lines[2].split(": ")[1].split(", "),
+          instructions: lines[3].split(": ")[1],
+          taste: lines[4].split(": ")[1],
+          cuisine: lines[5].split(": ")[1],
+          preparation_time: parseInt(lines[6].split(": ")[1]),
+          favorite: lines[7].split(": ")[1] === "Yes",
+        };
+      });
+
+    const filteredRecipes = recipes.filter((recipe) => {
+      return recipe.ingredients.every((ingredient) => {
+        const availableIngredient = availableIngredients.find(
+          (ai) => ai.name.toLowerCase() === ingredient.toLowerCase()
+        );
+        return availableIngredient && availableIngredient.quantity > 0;
+      });
+    });
+
+    const aiPrompt = `
+      You are a recipe recommendation assistant. Based on the provided recipes and the ingredients available at home, recommend recipes:
+      Ingredients available: ${JSON.stringify(availableIngredients, null, 2)}
+
+      Recipes:
+      ${JSON.stringify(filteredRecipes, null, 2)}
+
+      User prompt: ${prompt}
+
+      Return the result in a user-friendly format.
+    `;
+
+    const messages = [{ role: "system", content: aiPrompt }];
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages,
+    });
+
+    const aiResponse = completion.choices[0].message.content;
+
+    // Parse the AI response to remove unnecessary newlines
+    const suggestions = aiResponse
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line)
+      .join(" ");
+
+    res.status(200).json({
+      message: "Recipe suggestions",
+      suggestions,
+    });
+  } catch (error) {
+    console.error("Error fetching recipe suggestions:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllRecipes,
   addRecipe,
   getRecipeByCriteria,
   updateRecipeByRID,
+  getRecipeSuggestions,
 };
