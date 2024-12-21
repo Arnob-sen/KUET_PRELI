@@ -1,0 +1,36 @@
+RID: 1
+Recipe Name: Chocolate Cake
+Ingredients: Sugar, Flour, Cocoa Powder, Eggs
+Instructions: Mix all ingredients. Bake at 180°C for 30 minutes.
+Taste: Sweet
+Cuisine: Dessert
+Preparation Time: 45
+Favorite: Yes
+
+RID: 2
+Recipe Name: Spaghetti Carbonara
+Ingredients: Spaghetti, Eggs, Parmesan, Bacon
+Instructions: Cook spaghetti. Mix with other ingredients.
+Taste: Savory
+Cuisine: Italian
+Preparation Time: 30
+Favorite: No
+
+RID: 3
+Recipe Name: Steak and Potatoes
+Ingredients: Steak, Potatoes, Onion, Garlic
+Instructions: Cook steak and potatoes. Serve with sauce.
+Taste: Spicy
+Cuisine: American
+Preparation Time: 45
+Favorite: No
+
+RID: 4
+Recipe Name: Lemon Tart
+Ingredients: Lemon, Sugar, Butter, Flour, Eggs
+Instructions: Mix all ingredients to make a tart crust. Add lemon filling. Bake at 160°C for 25 minutes.
+Taste: Sweet and Tangy
+Cuisine: Dessert
+Preparation Time: 60
+Favorite: Yes
+
